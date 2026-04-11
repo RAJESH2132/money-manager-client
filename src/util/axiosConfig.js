@@ -1,7 +1,6 @@
 import axios from "axios";
 import { BASE_URL } from "./apiEndpoints";
-
-const TOKEN_KEY = "token";
+import { clearAuthData, getStoredToken } from "./authStorage";
 
 const axiosConfig = axios.create({
   baseURL: BASE_URL,
@@ -12,16 +11,8 @@ const axiosConfig = axios.create({
   },
 });
 
-// Endpoints that do NOT require Authorization header
-const excludeEndpoints = [
-  "/login",
-  "/register",
-  "/status",
-  "/activate",
-  "/health",
-];
+const excludeEndpoints = ["/login", "/register", "/status", "/activate", "/health"];
 
-// Request interceptor
 axiosConfig.interceptors.request.use(
   (config) => {
     const shouldSkipToken = excludeEndpoints.some((endpoint) =>
@@ -29,7 +20,7 @@ axiosConfig.interceptors.request.use(
     );
 
     if (!shouldSkipToken) {
-      const accessToken = localStorage.getItem(TOKEN_KEY);
+      const accessToken = getStoredToken();
 
       if (accessToken) {
         config.headers = config.headers || {};
@@ -42,7 +33,6 @@ axiosConfig.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// Response interceptor
 axiosConfig.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -50,7 +40,7 @@ axiosConfig.interceptors.response.use(
       const { status } = error.response;
 
       if (status === 401 && window.location.pathname !== "/login") {
-        // Unauthorized → redirect to login
+        clearAuthData();
         window.location.href = "/login";
       } else if (status === 500) {
         console.error("Server error. Please try again later.");

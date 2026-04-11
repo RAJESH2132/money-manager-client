@@ -6,3 +6,22 @@ body {
   background-color: #fcfbfc;
   overflow-x: hidden;
 }
+
+.hide-password-toggle::-ms-reveal,
+.hide-password-toggle::-ms-clear {
+  display: none;
+}
+
+@layer components {
+  .btn-primary {
+    @apply text-white rounded-lg py-3 font-medium shadow-md transition cursor-pointer bg-violet-900 hover:bg-violet-800;
+  }
+
+  .text-primary {
+    color: #5a0f7a;
+  }
+
+  .text-primary-dark:hover {
+    color: #4a0c66;
+  }
+}
