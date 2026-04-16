@@ -4,6 +4,9 @@ import { AUTH_CLEARED_EVENT, getStoredUser } from "../util/authStorage";
 
 export const AppContextProvider = ({ children }) => {
   const [user, setUser] = useState(() => getStoredUser());
+  const clearUser = () => {
+    setUser(null);
+  };
 
   useEffect(() => {
     const handleAuthCleared = () => {
@@ -20,6 +23,7 @@ export const AppContextProvider = ({ children }) => {
   const contextValue = {
     user,
     setUser,
+    clearUser,
   };
 
   return (

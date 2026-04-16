@@ -1,9 +1,10 @@
-import React from 'react'
+import React from "react";
+import Dashboard from "../components/Dashboard";
+import useUser from "../hooks/useUser";
 
 const Category = () => {
-  return (
-    <div>Category</div>
-  )
-}
+  useUser();
+  return <Dashboard activeMenu="Category">Category</Dashboard>;
+};
 
-export default Category
+export default Category;

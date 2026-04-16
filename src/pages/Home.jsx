@@ -1,9 +1,14 @@
-import React from 'react'
+import React from "react";
+import Dashboard from "../components/Dashboard";
+import useUser from "../hooks/useUser";
 
 const Home = () => {
+  useUser();
   return (
-    <div>Home</div>
-  )
-}
+    <div>
+      <Dashboard activeMenu="Dashboard">Home Page</Dashboard>
+    </div>
+  );
+};
 
-export default Home
+export default Home;
