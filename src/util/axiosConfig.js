@@ -4,7 +4,6 @@ import { clearAuthData, getStoredToken } from "./authStorage";
 
 const axiosConfig = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
