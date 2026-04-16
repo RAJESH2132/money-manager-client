@@ -1,9 +1,10 @@
-import React from 'react'
+import React from "react";
+import Dashboard from "../components/Dashboard";
+import useUser from "../hooks/useUser";
 
 const Income = () => {
-  return (
-    <div>Income</div>
-  )
-}
+  useUser();
+  return <Dashboard activeMenu="Income">Income</Dashboard>;
+};
 
-export default Income
+export default Income;

@@ -1,9 +1,10 @@
-import React from 'react'
+import React from "react";
+import Dashboard from "../components/Dashboard";
+import useUser from "../hooks/useUser";
 
 const Filter = () => {
-  return (
-    <div>Filter</div>
-  )
-}
+  useUser();
+  return <Dashboard activeMenu="Filter">Filter</Dashboard>;
+};
 
-export default Filter
+export default Filter;
