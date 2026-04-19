@@ -34,7 +34,7 @@ export const SIDE_BAR_DATA = [
   },
   {
     id: "05",
-    label: "Filters",
+    label: "Filter",
     icon: FunnelPlus,
     path: "/filter",
   },
