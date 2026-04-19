@@ -1,10 +1,164 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Dashboard from "../components/Dashboard";
 import useUser from "../hooks/useUser";
+import { Plus } from "lucide-react";
+import CategoryList from "../components/CategoryList";
+import axiosConfig from "../util/axiosConfig";
+import { API_ENDPOINTS } from "../util/apiEndpoints";
+import { toast } from "react-hot-toast";
+import Model from "../components/Model";
+import AddCategoryForm from "../components/AddCategoryForm";
 
 const Category = () => {
   useUser();
-  return <Dashboard activeMenu="Category">Category</Dashboard>;
+  const [loading, setLoading] = useState(false);
+  const [categoryData, setCategoryData] = useState([]);
+  const [openAddCategoryModel, setOpenAddCategoryModel] = useState(false);
+  const [openEditCategoryModel, setOpenEditCategoryModel] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const fetchCategoryDetails = async () => {
+    if (loading) return;
+
+    setLoading(true);
+
+    try {
+      const response = await axiosConfig.get(API_ENDPOINTS.GET_ALL_CATEGORIES);
+      if (response.status === 200) {
+        console.log(response.data);
+        setCategoryData(response.data);
+      }
+    } catch (error) {
+      console.error("Something went wrong. Please try again", error);
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategoryDetails();
+  }, []);
+
+  const handleAddCategory = async (category) => {
+    const { name, type, icon } = category;
+
+    if (!name.trim()) {
+      toast.error("Category Name is required");
+      return;
+    }
+
+    const isDuplicate = categoryData.some((category) => {
+      return category.name.toLowerCase() === name.trim().toLowerCase();
+    });
+
+    if (isDuplicate) {
+      toast.error("Category with this name already exists");
+      return;
+    }
+
+    try {
+      const response = axiosConfig.post(API_ENDPOINTS.ADD_CATEGORY, {
+        name,
+        type,
+        icon,
+      });
+      if ((await response).status === 201) {
+        toast.success("Category added successfully");
+        setOpenAddCategoryModel(false);
+        fetchCategoryDetails();
+      }
+    } catch (error) {
+      console.log("Error adding category:", error);
+      toast.error(error?.message || "Failed to add category.");
+    }
+  };
+
+  const handleEditCategory = (categoryToEdit) => {
+    setSelectedCategory(categoryToEdit);
+    setOpenEditCategoryModel(true);
+    console.log(categoryToEdit);
+  };
+
+  const handleUpdateCategory = async (updatedCategory) => {
+    const { id, name, type, icon } = updatedCategory;
+    if (!name.trim()) {
+      toast.error("Category Name is required");
+      return;
+    }
+
+    if (!id) {
+      toast.error("Category Id is required");
+      return;
+    }
+
+    try {
+      await axiosConfig.put(API_ENDPOINTS.UPDATE_CATEGORY(id), {
+        name,
+        type,
+        icon,
+      });
+      setOpenEditCategoryModel(false);
+      setSelectedCategory(null);
+      toast.success("Category updated successfully");
+      fetchCategoryDetails();
+    } catch (error) {
+      console.error(
+        "Error updating the category:",
+        error.response?.data?.message || error.message,
+      );
+      toast.error(error.response?.data?.message || "Failed to update category");
+    }
+  };
+
+  return (
+    <Dashboard activeMenu="Category">
+      <div className="my-5 mx-auto">
+        {/* Add button to add categoty */}
+        <div className="flex justify-between items-center mb-5">
+          <h2 className="text-2xl font-semibold">All Categories</h2>
+          <button
+            onClick={() => setOpenAddCategoryModel(true)}
+            className="add-btn flex items-center gap-1"
+          >
+            <Plus size={15} />
+            Add Category
+          </button>
+        </div>
+
+        {/* Category list */}
+        <CategoryList
+          categories={categoryData}
+          onEditCategory={handleEditCategory}
+        />
+
+        {/* Adding category model */}
+        <Model
+          title="Add Category"
+          isOpen={openAddCategoryModel}
+          onClose={() => setOpenAddCategoryModel(false)}
+        >
+          <AddCategoryForm onAddCategory={handleAddCategory} />
+        </Model>
+
+        {/* updating category model */}
+        <Model
+          isOpen={openEditCategoryModel}
+          onClose={() => {
+            setOpenEditCategoryModel(false);
+            setSelectedCategory(null);
+          }}
+          title="Update Category"
+        >
+          <AddCategoryForm
+            onAddCategory={handleUpdateCategory}
+            initialCategoryData={selectedCategory}
+            isEditing={true}
+          />
+        </Model>
+      </div>
+    </Dashboard>
+  );
 };
 
 export default Category;
