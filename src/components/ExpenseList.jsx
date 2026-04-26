@@ -3,19 +3,30 @@ import moment from "moment";
 import { Download, Mail } from "lucide-react";
 import TransactionInfoCard from "./TransactionInfoCard";
 
-const ExpenseList = ({ transactions, onDelete, onDownload, onEmail }) => {
+const ExpenseList = ({
+  transactions,
+  onDelete,
+  onDownload,
+  onEmail,
+  isDownloading,
+  isEmailing,
+}) => {
   return (
     <div className="card p-4">
       <div className="flex items-center justify-between">
         <h5 className="text-lg">Expense Transactions</h5>
         <div className="flex items-center justify-end gap-2">
-          <button className="card-btn" onClick={onEmail}>
+          <button className="card-btn" onClick={onEmail} disabled={isEmailing}>
             <Mail size={15} className="text-base" />
-            Email
+            {isEmailing ? "Sending..." : "Email"}
           </button>
-          <button className="card-btn" onClick={onDownload}>
+          <button
+            className="card-btn"
+            onClick={onDownload}
+            disabled={isDownloading}
+          >
             <Download size={15} className="text-base" />
-            Download
+            {isDownloading ? "Downloading..." : "Download"}
           </button>
         </div>
       </div>
