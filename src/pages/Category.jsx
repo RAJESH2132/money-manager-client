@@ -25,7 +25,6 @@ const Category = () => {
     try {
       const response = await axiosConfig.get(API_ENDPOINTS.GET_ALL_CATEGORIES);
       if (response.status === 200) {
-        console.log(response.data);
         setCategoryData(response.data);
       }
     } catch (error) {
@@ -69,7 +68,6 @@ const Category = () => {
         fetchCategoryDetails();
       }
     } catch (error) {
-      console.log("Error adding category:", error);
       toast.error(error?.message || "Failed to add category.");
     }
   };
@@ -77,7 +75,6 @@ const Category = () => {
   const handleEditCategory = (categoryToEdit) => {
     setSelectedCategory(categoryToEdit);
     setOpenEditCategoryModel(true);
-    console.log(categoryToEdit);
   };
 
   const handleUpdateCategory = async (updatedCategory) => {
