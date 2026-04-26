@@ -9,6 +9,7 @@ import ExpenseList from "../components/ExpenseList";
 import Model from "../components/Model";
 import AddExpenseForm from "../components/AddExpenseForm";
 import DeleteAlert from "../components/DeleteAlert";
+import { downloadBlobFile, getFilenameFromDisposition } from "../util/report";
 
 const Expense = () => {
   useUser();
@@ -17,6 +18,8 @@ const Expense = () => {
   const [loading, setLoading] = useState(false);
 
   const [openAddExpenseModel, setOpenAddExpenseModel] = useState(false);
+  const [isDownloadingReport, setIsDownloadingReport] = useState(false);
+  const [isEmailingReport, setIsEmailingReport] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState({
     show: false,
     data: null,
@@ -111,12 +114,53 @@ const Expense = () => {
     }
   };
 
-  const handleDownloadExpenseDetails = () => {
-    console.log("Download expense details");
+  const handleDownloadExpenseDetails = async () => {
+    if (isDownloadingReport) return;
+
+    setIsDownloadingReport(true);
+    try {
+      const response = await axiosConfig.post(
+        API_ENDPOINTS.EXPENSE_REPORT_EXCEL,
+        {},
+        {
+          responseType: "blob",
+          headers: {
+            Accept:
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
+        },
+      );
+
+      const contentDisposition = response.headers?.["content-disposition"];
+      const filename = getFilenameFromDisposition(
+        contentDisposition,
+        `expense-report-${new Date().toISOString().split("T")[0]}.xlsx`,
+      );
+      downloadBlobFile(response.data, filename);
+      toast.success("Expense report downloaded successfully");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to download expense report",
+      );
+    } finally {
+      setIsDownloadingReport(false);
+    }
   };
 
-  const handleEmailExpenseDetails = () => {
-    console.log("Email expense details");
+  const handleEmailExpenseDetails = async () => {
+    if (isEmailingReport) return;
+
+    setIsEmailingReport(true);
+    try {
+      await axiosConfig.post(API_ENDPOINTS.EXPENSE_REPORT_EMAIL, {});
+      toast.success("Expense report email sent successfully");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to send expense report email",
+      );
+    } finally {
+      setIsEmailingReport(false);
+    }
   };
 
   useEffect(() => {
@@ -139,6 +183,8 @@ const Expense = () => {
             onDelete={(id) => setOpenDeleteAlert({ show: true, data: id })}
             onDownload={handleDownloadExpenseDetails}
             onEmail={handleEmailExpenseDetails}
+            isDownloading={isDownloadingReport}
+            isEmailing={isEmailingReport}
           />
 
           <Model

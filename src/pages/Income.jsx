@@ -10,6 +10,7 @@ import { Plus } from "lucide-react";
 import AddIncomeForm from "../components/AddIncomeForm";
 import DeleteAlert from "../components/DeleteAlert";
 import IncomeOverview from "../components/IncomeOverview";
+import { downloadBlobFile, getFilenameFromDisposition } from "../util/report";
 
 const Income = () => {
   useUser();
@@ -18,6 +19,8 @@ const Income = () => {
   const [loading, setLoading] = useState(false);
 
   const [openAddIncomeModel, setOpenAddIncomeModel] = useState(false);
+  const [isDownloadingReport, setIsDownloadingReport] = useState(false);
+  const [isEmailingReport, setIsEmailingReport] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState({
     show: false,
     data: null,
@@ -110,17 +113,57 @@ const Income = () => {
       toast.success("Income deleted successfully");
       fetchIncomeDetails();
     } catch (error) {
-      console.log("Error deleting income", error);
       toast.error(error.response?.data?.message || "Failed to delete income");
     }
   };
 
-  const handleDownloadIncomeDetails = () => {
-    console.log("Download income details");
+  const handleDownloadIncomeDetails = async () => {
+    if (isDownloadingReport) return;
+
+    setIsDownloadingReport(true);
+    try {
+      const response = await axiosConfig.post(
+        API_ENDPOINTS.INCOME_REPORT_EXCEL,
+        {},
+        {
+          responseType: "blob",
+          headers: {
+            Accept:
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
+        },
+      );
+
+      const contentDisposition = response.headers?.["content-disposition"];
+      const filename = getFilenameFromDisposition(
+        contentDisposition,
+        `income-report-${new Date().toISOString().split("T")[0]}.xlsx`,
+      );
+      downloadBlobFile(response.data, filename);
+      toast.success("Income report downloaded successfully");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to download income report",
+      );
+    } finally {
+      setIsDownloadingReport(false);
+    }
   };
 
-  const handleEmailIncomeDetails = () => {
-    console.log("Email income details");
+  const handleEmailIncomeDetails = async () => {
+    if (isEmailingReport) return;
+
+    setIsEmailingReport(true);
+    try {
+      await axiosConfig.post(API_ENDPOINTS.INCOME_REPORT_EMAIL, {});
+      toast.success("Income report email sent successfully");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to send income report email",
+      );
+    } finally {
+      setIsEmailingReport(false);
+    }
   };
 
   useEffect(() => {
@@ -143,6 +186,8 @@ const Income = () => {
             onDelete={(id) => setOpenDeleteAlert({ show: true, data: id })}
             onDownload={handleDownloadIncomeDetails}
             onEmail={handleEmailIncomeDetails}
+            isDownloading={isDownloadingReport}
+            isEmailing={isEmailingReport}
           />
 
           <Model
