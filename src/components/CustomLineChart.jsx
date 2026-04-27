@@ -190,6 +190,7 @@ const CustomLineChart = ({ data = [] }) => {
       },
       y: {
         beginAtZero: true,
+        grid: { display: false },
       },
     },
   };
