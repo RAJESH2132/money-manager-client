@@ -21,5 +21,6 @@ export const API_ENDPOINTS = {
   DELETE_EXPENSE: (expenseId) => `/expenses/${expenseId}`,
   EXPENSE_REPORT_EXCEL: "/expenses/report/excel",
   EXPENSE_REPORT_EMAIL: "/expenses/report/email",
+  APPLY_FILTER: "/filter",
   UPLOAD_IMAGE: `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
 };
